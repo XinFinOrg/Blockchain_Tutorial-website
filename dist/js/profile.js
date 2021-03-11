@@ -8,20 +8,20 @@ if (typeof jQuery != "undefined") {
           alert("You are not logged in, please visit after logging in");
           window.location.replace("https://www.blockdegree.org/login");
         } else {
-          let kycStatus;
+          let kycStatus, kycNo, dob, address, city, state, country, pincode;
           $.ajax({
             method: "get",
             url: "/api/getUserKyc",
             success: (kycResult) => {
-              
-              kycResult=kycResult.data;
+
+              kycResult = kycResult.data;
 
               kycStatus = document.getElementById("kycStatus");
               kycStatus.innerHTML = "pending";
 
               console.log("kycStatus", kycResult);
 
-              if (kycResult.isKycVerified === true) {
+              if ((kycResult.isKycVerified === true && kycResult.kycStatus === "approved") || (kycResult.isSubmitted === true && kycResult.kycStatus === "pending")) {
                 kycStatus = document.getElementById("kycStatus");
                 kycStatus.innerHTML = kycResult.kycStatus;
                 document.getElementById("kyc-profile-btn").style.display =
@@ -30,10 +30,23 @@ if (typeof jQuery != "undefined") {
               } else {
                 kycStatus = document.getElementById("kycStatus");
                 kycStatus.innerHTML = kycResult.kycStatus;
+                // kycNo = document.getElementById("kycNo");
+                // kycNo.innerHTML = kycResult.kycNo;
+                // dob = document.getElementById("dob");
+                // dob.innerHTML = kycResult.dob;
+                // address = document.getElementById("address");
+                // address.innerHTML = kycResult.address;
+                // city = document.getElementById("city");
+                // city.innerHTML = kycResult.city;
+                // state = document.getElementById("state");
+                // state.innerHTML = kycResult.state;
+                // country = document.getElementById("country");
+                // country.innerHTML = kycResult.country;
+                // pincode = document.getElementById("pincode");
+                // pincode.innerHTML = kycResult.pincode;
               }
             },
           });
-
           // is logged in, set the parameter
           let userProfile = result.user;
           // getting elements in the view-profile page
@@ -108,13 +121,13 @@ if (typeof jQuery != "undefined") {
           let currentUrl = window.location.href;
           let paramsString = currentUrl.split("?")[1];
           if (paramsString) {
-            console.log(`ParamsString: ${paramsString}`);
+            console.log(`ParamsString: ${ paramsString }`);
             let params = paramsString.split("&");
             console.log(params);
             for (let i = 0; i < params.length; i++) {
               let key = params[i].split("=")[0],
                 value = params[i].split("=")[1];
-              console.log(`Key: ${key} & Value: ${value}`);
+              console.log(`Key: ${ key } & Value: ${ value }`);
               if (key == "confirmName" && value.startsWith("true")) {
                 // new registration, need to confirm the name.
                 document.getElementById("btn-confirmName").click();
@@ -291,7 +304,8 @@ if (typeof jQuery != "undefined") {
           processData: false,
           success: (userData) => {
             if (userData.status == 200) {
-              $.notify(`KYC Saved ${result.user.email}`, { type: "success" });
+              $.notify(`KYC Saved ${ result.user.email }`, { type: "success" });
+              window.location.reload();
             } else {
               $.notify("something wrong", { type: "danger" });
             }
@@ -305,7 +319,7 @@ if (typeof jQuery != "undefined") {
     console.log("inside update link");
     if (
       confirm(
-        `Warning: You are going to remove a social account linkeded to this account, you will no longer be able to login using this social account from ${social} after removing`
+        `Warning: You are going to remove a social account linkeded to this account, you will no longer be able to login using this social account from ${ social } after removing`
       )
     ) {
       $.ajax({
@@ -319,7 +333,7 @@ if (typeof jQuery != "undefined") {
               user.auth[social].id == undefined ||
               user.auth[social].id == ""
             ) {
-              alert(`Error: ${social} is not linked to this account`);
+              alert(`Error: ${ social } is not linked to this account`);
             } else {
               $.ajax({
                 method: "post",
@@ -349,7 +363,7 @@ if (typeof jQuery != "undefined") {
                       }
                     }
                   } else {
-                    alert(`Cannot not remove: ${result.error}`);
+                    alert(`Cannot not remove: ${ result.error }`);
                   }
                 },
                 error: (err) => {
@@ -383,13 +397,13 @@ if (typeof jQuery != "undefined") {
           // user is logged in
           let user = result.user;
           if (user.auth[social].id == undefined || user.auth[social].id == "") {
-            $.notify(`Error: ${social} is not linked to this account`, {
+            $.notify(`Error: ${ social } is not linked to this account`, {
               type: "danger",
             });
           } else {
             if (
               confirm(
-                `Warning: This social account from ${social} will be forever detached from your profile & you wont be able to login using this social.`
+                `Warning: This social account from ${ social } will be forever detached from your profile & you wont be able to login using this social.`
               )
             ) {
               $.ajax({
@@ -403,7 +417,7 @@ if (typeof jQuery != "undefined") {
                     });
                     checkAuth();
                   } else {
-                    alert(`Cannot not remove: ${result.error}`);
+                    alert(`Cannot not remove: ${ result.error }`);
                   }
                 },
                 error: (err) => {

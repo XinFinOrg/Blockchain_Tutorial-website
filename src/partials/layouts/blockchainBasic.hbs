@@ -1,7 +1,11 @@
 {{> includes/hero hero-title="Blockchain Basic Exam"}}
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.min.js" integrity="sha512-IMLquIKoKQeQ+kYuec3BvLYjy3yF2nH/ojHPkXQnQTeGKRliZcVed19I6E0t+WBt+9uPuEba0t2iyZAVP8mdlw==" crossorigin="anonymous"></script>
+<script src="https://www.WebRTC-Experiment.com/RecordRTC.js"></script>
 <div class="container__cstm">
+  <div class="alert alert-warning alert-outline" style="margin-bottom: 20px;">
+      <strong>Warning:</strong> Your Actions are recorded.
+    </div>
+  <video id="myVideo" autoplay playsinline style="display: none;"></video>
   <div class="exam-heading">Blockchain Basic Exam</div>
 
   <div id="exam">
@@ -75,6 +79,60 @@
     $(window).scrollTop($(`#q${id.split(".")[2]}`).offset().top - $(this).height() / 2)
   }
 
+  let recorder;
+  let video = document.querySelector('#myVideo');
+
+  function captureCamera(callback) {
+        navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(camera => {
+            callback(camera);
+        }).catch(error => {
+            alert('Unable to capture your camera. Please enable your cam');
+            console.log(error);
+        });
+    }
+
+    captureCamera(camera => {
+        video.muted = true;
+        video.volume = 0;
+        video.srcObject = camera;
+        recorder = RecordRTC(camera, {
+            type: 'video',
+            recorderType: MediaStreamRecorder,
+        });
+        recorder.startRecording();
+        recorder.camera = camera;
+    });
+
+     function stopRecordingCallback() {
+        video.src = video.srcObject = null;
+        video.muted = false;
+        video.volume = 1;
+        let blob = recorder.getBlob()
+        video.src = URL.createObjectURL(blob);
+        recorder.camera;
+        console.log('Start Record Time:::::', video.src, blob);
+
+        let newForm = new FormData();
+        newForm.append("videoConfigLink", video.src)
+        newForm.append("courseName","BlockChain-Basic")
+        $.ajax({
+          method:"post",
+          url:"/api/examVideo",
+          data:newForm,
+          enctype: "multipart/form-data",
+          contentType: false,
+          processData: false,
+          success:(videoResult) => {
+            if (videoResult.status == 200) {
+              $.notify(examId.message, { type: "success" })
+        } else {
+              $.notify(examId.message, { type: "danger" })
+        }
+        }})
+        recorder.destroy();
+        recorder = null;
+    }
+
   function handleSubmitClicked() {
     /* 
     parse through all the rows; duplicate the answers but send in order.
@@ -127,7 +185,8 @@
        dataType: 'json',
        success : function(result) {
          if (result.status){
-           window.location.replace("/exam-result");
+           recorder.stopRecording(stopRecordingCallback);
+          // window.location.replace("/exam-result");
          }else{
            $.notify(result.error,{type:"danger"});
          }
@@ -186,5 +245,6 @@
       }
     }
   }
+
 
 </script>

@@ -78,20 +78,6 @@ const fundMyDegreeColumns = [
         headerFormatter: defHeadFormatter,
     },
     {
-        dataField: "status",
-        text: "Status",
-        filter: textFilter(),
-        sort: true,
-        headerFormatter: defHeadFormatter,
-    },
-    {
-        dataField: "valid",
-        text: "Valid",
-        filter: textFilter(),
-        sort: true,
-        headerFormatter: defHeadFormatter,
-    },
-    {
         dataField: "fundId",
         text: "Fund ID",
         filter: textFilter(),
@@ -144,18 +130,19 @@ export class FundMyDegree extends Component {
         let srNo = 1;
         let returnData = [];
         this.props.fundmydegree.data.map(userFund => {
-            returnData.push({
-                srNo: srNo++,
-                email: userFund.email,
-                userName: userFund.userName,
-                status: userFund.status,
-                valid: userFund.valid,
-                fundId: userFund.fundId,
-                paypalId: userFund.paypalId,
-                razorpayId: userFund.razorpayId,
-                burnTx: userFund.burnTx,
-                burnAmnt: userFund.burnAmnt
-            });
+            if (!userFund.length) return <span>Data Not Available</span>;
+            else {
+                returnData.push({
+                    srNo: srNo++,
+                    email: userFund.email,
+                    userName: userFund.userName,
+                    fundId: userFund.fundId,
+                    paypalId: userFund.paypalId,
+                    razorpayId: userFund.razorpayId,
+                    burnTx: userFund.burnTx,
+                    burnAmnt: userFund.burnAmnt
+                });
+            }
         });
         if (document.getElementById("currDataCount"))
             document.getElementById("currDataCount").innerHTML = returnData.length;

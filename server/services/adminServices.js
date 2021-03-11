@@ -1,6 +1,7 @@
 const fs = require("fs");
 const _ = require("lodash");
 const path = require("path");
+const uuidv4 = require("uuid/v4");
 const CoursePrice = require("../models/coursePrice");
 const AllWallet = require("../models/wallet");
 const KeyConfig = require("../config/keyConfig");
@@ -20,15 +21,16 @@ const SocialShare = require("../models/socialShare");
 const UserSessions = require("../models/userSessions");
 const razorpaylog = require('../models/razorpay_payment');
 const { renderFunderCerti } = require("../helpers/renderFunderCerti");
- const {
-   makeValueTransferXDC,
-   getBalance,
-   getTransactionTimestamp,
- } = require("../helpers/blockchainHelpers");
+const {
+  makeValueTransferXDC,
+  getBalance,
+  getTransactionTimestamp,
+} = require("../helpers/blockchainHelpers");
 const emailer = require("../emailer/impl");
 const kycDetails = require("../models/kycDetails");
 const userReferral = require("../models/userReferral");
 const userFundRequest = require("../models/userFundRequest");
+const examSession = require("../models/examSession");
 
 exports.addCourse = async (req, res) => {
   if (
@@ -1494,7 +1496,9 @@ exports.approveKycUser = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await kycDetails.findOneAndUpdate(email, {
-      $set: { isKycVerified: true, kycStatus: "approved" },
+      $set: {
+        isSubmitted: true, isKycVerified: true, kycStatus: "approved"
+      },
     });
     return res.json({
       message: "User Kyc Approved",
@@ -1512,7 +1516,9 @@ exports.rejectKycUser = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await kycDetails.findOneAndUpdate(email, {
-      $set: { isKycVerified: false, kycStatus: "rejected" },
+      $set: {
+        isSubmitted: false, isKycVerified: false, kycStatus: "rejected"
+      },
     });
     return res.json({
       message: "User Kyc Rejected",
@@ -1616,6 +1622,22 @@ exports.getUserSessions = async (req, res) => {
   } catch (e) {
     console.log(e);
     res.json({ status: false, error: "internal error" });
+  }
+};
+
+exports.setVideoSessions = async (req, res) => {
+  try {
+    const userSession = await UserSessions.findOne({ email: req.user.email }).sort({ createdAt: -1 });
+    await new examSession({
+      email: req.user.email,
+      examId: uuidv4(),
+      sessionId: userSession.sessionId,
+      courseId: req.body.courseId
+    }).save();
+    res.status(200).json({ status: 200, message: "Video Session Time Set" });
+  } catch (error) {
+    console.error('Error:::', error);
+    res.status(422).json({ message: "Something Wrong" });
   }
 };
 

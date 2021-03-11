@@ -2,10 +2,11 @@ const mongoose = require("mongoose");
 
 const mongooseSchema = mongoose.Schema(
   {
+    isSubmitted: Boolean,
     isKycVerified: Boolean,
     kycStatus: { type: String, default: "pending", enum: ["pending", "rejected", "approved"] },
     name: String,
-    email: String,
+    email: { type: String, unique: true },
     dob: String,
     kycNo: String,
     address: String,

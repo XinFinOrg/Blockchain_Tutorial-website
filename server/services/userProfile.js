@@ -28,7 +28,7 @@ exports.setupProfile = async (req, res) => {
   try {
     user = await User.findOne({ email: req.user.email });
   } catch (e) {
-    console.error(`Exception in setupProfile ${e}`);
+    console.error(`Exception in setupProfile ${ e }`);
     res.render("displayError", { error: "Exception in setup profile" });
   }
   if (!user) {
@@ -56,45 +56,76 @@ exports.setupProfile = async (req, res) => {
 
 exports.kycUserDetails = async (req, res) => {
   try {
+
+    /**
+     * 
+     * KYC exits? update
+     * 
+     */
+
     let currentPath = kycImagepath;
+    const existsUser = await kycDetails.findOne({ email: req.user.email });
     if (_.isNull(req.files) && _.isNull(req.body)) {
       res.status(400).json({
         status: 400,
-        message: "please select all 3 images with all proper data",
+        message: "please select all 3 images with all proper data------",
       });
     }
     const selfiePic = uuid();
-    fs.writeFileSync(currentPath+ "/" + selfiePic+".png", req.files.selfieImg.data);
+    fs.writeFileSync(currentPath + "/" + selfiePic + ".png", req.files.selfieImg.data);
     const kycFrontPic = uuid();
-    fs.writeFileSync(currentPath+ "/" + kycFrontPic+".png", req.files.kycFrontImg.data);
+    fs.writeFileSync(currentPath + "/" + kycFrontPic + ".png", req.files.kycFrontImg.data);
     const kycBackPic = uuid();
-    fs.writeFileSync(currentPath+ "/" + kycBackPic+".png", req.files.kycBackImg.data);
-    const data = await kycDetails({
-      isKycVerified: false,
-      kycStatus: "pending",
-      name: req.body.name,
-      email: req.body.email,
-      dob: req.body.dob,
-      kycNo: req.body.kycNo,
-      address: req.body.address,
-      city: req.body.city,
-      state: req.body.state,
-      country: req.body.country,
-      pincode: req.body.pincode,
-      img: {
-        selfie: selfiePic,
-        kycFrontImg: kycFrontPic,
-        kycBackImg: kycBackPic,
-      },
-    }).save();
-    res.status(200).json({
-      message: "User Kyc Saved Successfully",
-      status: 200,
-      data,
-    });
+    fs.writeFileSync(currentPath + "/" + kycBackPic + ".png", req.files.kycBackImg.data);
+    if (!existsUser) {
+      const data = await new kycDetails({
+        isSubmitted: true,
+        isKycVerified: false,
+        kycStatus: "pending",
+        name: req.body.name,
+        email: req.user.email,
+        dob: req.body.dob,
+        kycNo: req.body.kycNo,
+        address: req.body.address,
+        city: req.body.city,
+        state: req.body.state,
+        country: req.body.country,
+        pincode: req.body.pincode,
+        img: {
+          selfie: selfiePic,
+          kycFrontImg: kycFrontPic,
+          kycBackImg: kycBackPic,
+        },
+      }).save();
+      res.status(200).json({
+        message: "User Kyc Saved Successfully",
+        status: 200,
+        data,
+      });
+    } else {
+      const updateUser = await kycDetails.findOneAndUpdate({ email: req.user.email }, {
+        $set: {
+          isSubmitted: true,
+          isKycVerified: false,
+          kycStatus: "pending",
+          dob: req.body.dob,
+          kycNo: req.body.kycNo,
+          address: req.body.address,
+          city: req.body.city,
+          state: req.body.state,
+          country: req.body.country,
+          pincode: req.body.pincode,
+          img: {
+            selfie: selfiePic,
+            kycFrontImg: kycFrontPic,
+            kycBackImg: kycBackPic,
+          },
+        }
+      });
+      res.status(200).json({ data: updateUser, status: 200, message: "KYC uploaded" });
+    }
   } catch (error) {
     console.log("error", error);
-
     res.status(400).json({
       status: 400,
       message: "please select all 3 images",
@@ -105,7 +136,7 @@ exports.kycUserDetails = async (req, res) => {
 exports.getProfile = async (req, res) => {
   console.log("called get profile");
   const user = await User.findOne({ email: req.user.email }).catch((e) =>
-    console.error(`Exception in setupProfile ${e}`)
+    console.error(`Exception in setupProfile ${ e }`)
   );
   if (!user) {
     return console.error(`User not found, seems like the DB is down`);
@@ -131,7 +162,7 @@ exports.getUserKyc = async (req, res) => {
 exports.addProfileEdu = async (req, res) => {
   console.log("called add profile edu");
   const user = await User.findOne({ email: req.user.email }).catch((e) =>
-    console.error(`Exception in setupProfile ${e}`)
+    console.error(`Exception in setupProfile ${ e }`)
   );
   if (!user) {
     return console.error(`User not found, seems like the DB is down`);
@@ -147,7 +178,7 @@ exports.addProfileEdu = async (req, res) => {
 exports.updateProfilePhoto = async (req, res) => {
   console.log("called update profile photo");
   const user = await User.findOne({ email: req.user.email }).catch((e) =>
-    console.error(`Exception in setupProfile ${e}`)
+    console.error(`Exception in setupProfile ${ e }`)
   );
   if (!user) {
     return console.error(`User not found, seems like the DB is down`);
@@ -160,7 +191,7 @@ exports.updateProfilePhoto = async (req, res) => {
 exports.deleteProfileEdu = async (req, res) => {
   console.log("called delete profile edu");
   const user = await User.findOne({ email: req.user.email }).catch((e) =>
-    console.error(`Exception in setupProfile ${e}`)
+    console.error(`Exception in setupProfile ${ e }`)
   );
   if (!user) {
     return console.error(`User not found, seems like the DB is down`);
@@ -181,7 +212,7 @@ exports.removeSocial = async (req, res) => {
   if (user != null) {
     // found user
     console.log(
-      `Request to remove social ${social} for user ${req.user.email}`
+      `Request to remove social ${ social } for user ${ req.user.email }`
     );
     let couldRemove = false;
     Object.keys(user.auth).forEach((currAuth) => {
@@ -227,7 +258,7 @@ exports.setProfileName = async (req, res) => {
     user = await User.findOne({ email: req.user.email });
   } catch (e) {
     console.error(
-      `Error occured at setProfileName for user : ${req.user.email} : ${e}`
+      `Error occured at setProfileName for user : ${ req.user.email } : ${ e }`
     );
     return res.json({
       updated: false,
@@ -238,7 +269,7 @@ exports.setProfileName = async (req, res) => {
   if (user == null) {
     return res.json({
       updated: false,
-      error: `No user ${req.user.email} found!!`,
+      error: `No user ${ req.user.email } found!!`,
     });
   }
   user.name = req.body.fullName;
@@ -246,7 +277,7 @@ exports.setProfileName = async (req, res) => {
     await user.save();
   } catch (e) {
     console.error(
-      `Error occured at setProfileName for user ${req.user.email} `,
+      `Error occured at setProfileName for user ${ req.user.email } `,
       e
     );
     return res.json({
@@ -391,7 +422,7 @@ exports.getUserRefId = async (req, res) => {
     }
     res.json({ status: true, refId: user.referralCode, url: shortUrl });
   } catch (e) {
-    console.log(`exception  at ${__filename}.getUserRefId: `, e);
+    console.log(`exception  at ${ __filename }.getUserRefId: `, e);
     res.json({ status: false, error: "internal error" });
   }
 };

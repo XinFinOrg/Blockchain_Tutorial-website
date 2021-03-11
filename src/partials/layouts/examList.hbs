@@ -271,7 +271,7 @@
             ✔ Get access to exclusive video.<br>
           </div>
           <div class="card-price width--full text-center">
-            <h2 class="pb-3 text-white" id="course_4curr_price">$97</h2>
+            <h2 class="pb-3 text-white" id="course_4curr_price">$149</h2>
 
             {{#if video }}
             <button onclick="videoScreen()" class="btn text-body btn-light mb-3" data-price="videoScreen"
@@ -279,7 +279,7 @@
               View Videos
             </button>
             {{else}}
-            <button onclick="payVideoSub()" class=" btn text-body btn-light mb-3" data-price="97"
+            <button onclick="payVideoSub()" class=" btn text-body btn-light mb-3" data-price="149"
               id="videoMember">PayPal</button>
             {{/if}}
             <div id="btn-videoMembership" style="display:none" data-toggle="modal" data-target="#videoMembership">
@@ -342,7 +342,7 @@
   let originCountry = "{{country}}"
   let showRazorpay = false;
 
-  console.log(`origin country: |${originCountry}|`, "show razorpay: ", showRazorpay);
+  console.log(`origin country: |${ originCountry }|`, "show razorpay: ", showRazorpay);
 
   const xxx = "{{video}}";
 
@@ -360,13 +360,24 @@
   const mainnetExplorer = "https://explorer.xinfin.network/tx/";
 
   function takeExam(slug) {
-
+    $.ajax({
+      method: "post",
+      url: "/api/videoSession",
+      data: { courseId: slug.id },
+      success: (examId) => {
+        if (examId.status == 200) {
+          $.notify(examId.message, { type: "success" })
+        } else {
+          $.notify(examId.message, { type: "danger" })
+        }
+      }
+    })
     $.ajax({
       method: "get",
       url: "/api/current_user",
       success: response => {
         if (response.status) {
-          if (confirm(`Certificate will be issued on name "${response.user.name}" Press OK to confirm or else CANCEL & edit your name via the PROFILE tab.`)) {
+          if (confirm(`Certificate will be issued on name "${ response.user.name }" Press OK to confirm or else CANCEL & edit your name via the PROFILE tab.`)) {
             if (slug.id === "course_1") {
               window.location = '/blockchain-basic-exam'
             } else if (slug.id === "course_2") {
@@ -392,13 +403,13 @@
   }
 
   function handlePayment(course_id, price) {
-    console.log(`Course ID: ${course_id} & Price: ${price}`);
-    console.log(`Course ID: ${course_id.id} & Price: ${price}`);
+    console.log(`Course ID: ${ course_id } & Price: ${ price }`);
+    console.log(`Course ID: ${ course_id.id } & Price: ${ price }`);
     const codeName = document.getElementById(course_id.id + "codeName").value;
     console.log(codeName)
     if (codeName.trim().length == 0) {
       // no promo code used
-      $(`#btn-paymentModal${course_id.id}`).click();
+      $(`#btn-paymentModal${ course_id.id }`).click();
     } else {
       $.ajax({
         url: "/api/checkCode",
@@ -414,7 +425,7 @@
               return;
             } else {
               // Not a free course load the Payment Modal
-              $(`#btn-paymentModal${course_id.id}`).click();
+              $(`#btn-paymentModal${ course_id.id }`).click();
             }
           }
           else {
@@ -434,7 +445,7 @@
     const referralCode = document.getElementById(course_id.id + "ReferralCode").value;
     console.log(course_id.id + "codeName");
     console.log(codeName);
-    $(`#${course_id.id}`).attr("disabled", true);
+    $(`#${ course_id.id }`).attr("disabled", true);
 
     let formNew = document.createElement('form');
     formNew.style.display = "none";
@@ -505,7 +516,7 @@
           const { orderId, key, amnt, email, userName } = resp.data;
           const newOrder = {
             key: key, // Enter the Key ID generated from the Dashboard
-            amount: `${amnt}`, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            amount: `${ amnt }`, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
             currency: "INR",
             name: userName,
             description: "Online Education",
@@ -565,7 +576,7 @@
     // need to check if the user is logged in.
 
 
-    $(`#btn-XinPayNotifier${course_id.id}`).click();
+    $(`#btn-XinPayNotifier${ course_id.id }`).click();
 
   }
 
@@ -627,7 +638,7 @@
             } catch (e) {
               console.error(e)
             }
-            console.log(`Price after discount: ${price}`);
+            console.log(`Price after discount: ${ price }`);
             if (price == 0) {
               // free course
               try {
@@ -650,7 +661,7 @@
               }
             }
             const coursePriceXdce = parseFloat(price) / (10000 * priceUsd) // dividend of 10000 for testing
-            console.log(`Original Price: ${price} PriceUSD: ${priceUsd} Final Amnt: ${coursePriceXdce}`)
+            console.log(`Original Price: ${ price } PriceUSD: ${ priceUsd } Final Amnt: ${ coursePriceXdce }`)
             await ethereum.enable();
 
             const xdceAddrMainnet = "0x41ab1b6fcbb2fa9dced81acbdec13ea6315f2bf2";
@@ -1192,7 +1203,7 @@
               // result is transaction hash
 
               const modTitle = "<strong>Transaction Submitted Successfully</strong>";
-              const modBody = "Your transaction has been successfully submitted. Once your transaction will be confirmed, processing of the payment will be initiated. Please don't leave this page untill your transaction is confirmed. Your trasnaction hash is <div style='display:none;' id='pending_txHash' >" + result + "</div> " + `<a href="${etherScanIo + result}" target="_blank">${result.toString().slice(0, 11)}...</a> <button onclick="copyTextToClipboard('pending_txHash')" >Click</button> to copy hash`;
+              const modBody = "Your transaction has been successfully submitted. Once your transaction will be confirmed, processing of the payment will be initiated. Please don't leave this page untill your transaction is confirmed. Your trasnaction hash is <div style='display:none;' id='pending_txHash' >" + result + "</div> " + `<a href="${ etherScanIo + result }" target="_blank">${ result.toString().slice(0, 11) }...</a> <button onclick="copyTextToClipboard('pending_txHash')" >Click</button> to copy hash`;
 
               openModal("modal-info", modTitle, modBody);
 
@@ -1210,7 +1221,7 @@
                 success: resp => {
                   if (resp.status) {
                     const modTitle = "<strong>Transaction Received Successfully</strong>";
-                    const modBody = "Your transaction has been successfully submitted & received. Once your transaction has enough confirmations, your payment will be completed. You can check the state of your payment in the <strong><a href='/profile?inFocus=cryptoPayment'>Profile</a></strong> page. Your trasnaction hash is <div style='visibility:hidden' id='confirmed_txHash' >" + result + "</div> " + `<a href="${etherScanIo + result}" target="_blank">${result.toString().slice(0, 11)}...</a>. Click on link to view on etherscan.`;
+                    const modBody = "Your transaction has been successfully submitted & received. Once your transaction has enough confirmations, your payment will be completed. You can check the state of your payment in the <strong><a href='/profile?inFocus=cryptoPayment'>Profile</a></strong> page. Your trasnaction hash is <div style='visibility:hidden' id='confirmed_txHash' >" + result + "</div> " + `<a href="${ etherScanIo + result }" target="_blank">${ result.toString().slice(0, 11) }...</a>. Click on link to view on etherscan.`;
                     openModal("modal-success", modTitle, modBody);
                     $.notifyClose('bottom-right')
                     return;
@@ -1218,13 +1229,13 @@
                     // something went wrong, ask to store tx & mail to info@blockdegree.org
 
                     const modTitle = "<strong>Some Error Occured</strong>";
-                    const modBody = resp.error + ".Your trasnaction hash is <div style='display:none' id='confirmed_err_txHash' >" + result + "</div> " + `<a href="${etherScanIo + result}" target="_blank">${result.toString().slice(0, 11)}...</a> <button onclick="copyTextToClipboard('confirmed_err_txHash')" >Click</button> to copy hash`;
+                    const modBody = resp.error + ".Your trasnaction hash is <div style='display:none' id='confirmed_err_txHash' >" + result + "</div> " + `<a href="${ etherScanIo + result }" target="_blank">${ result.toString().slice(0, 11) }...</a> <button onclick="copyTextToClipboard('confirmed_err_txHash')" >Click</button> to copy hash`;
                     openModal("modal-warning", modTitle, modBody);
                     $.notifyClose('bottom-right')
                   }
                 },
                 error: xhr => {
-                  $.notify(`<strong>Fatal Error</strong> : Fatal Error occured while connecting with our server. Please note your tx-hash <strong>${result}</strong> and send a mail to <strong>info@blockdegree.org</strong>`, { type: "danger", delay: 10000 })
+                  $.notify(`<strong>Fatal Error</strong> : Fatal Error occured while connecting with our server. Please note your tx-hash <strong>${ result }</strong> and send a mail to <strong>info@blockdegree.org</strong>`, { type: "danger", delay: 10000 })
                   $.notifyClose('bottom-right')
                   return;
                 }
@@ -1281,7 +1292,7 @@
     } catch (e) {
       console.error(e)
     }
-    console.log(`Price after discount: ${txPrice}`);
+    console.log(`Price after discount: ${ txPrice }`);
     if (txPrice == 0) {
       // free course
       try {
@@ -1332,7 +1343,7 @@
             }
             const priceUsd = parseFloat(response);
             const coursePriceXdc = parseFloat(txPrice) / priceUsd
-            console.log(`Original Price: ${txPrice} PriceUSD: ${priceUsd} Final Amnt: ${coursePriceXdc}`)
+            console.log(`Original Price: ${ txPrice } PriceUSD: ${ priceUsd } Final Amnt: ${ coursePriceXdc }`)
             await ethereum.enable();
             const xdcRecipient = await getTokenRecipient("50", "xdc");
             if (xdcRecipient == null) {
@@ -1349,7 +1360,7 @@
                 console.log("Transaction Hash: ", result);
 
                 const modTitle = "<strong>Transaction Submitted Successfully</strong>";
-                const modBody = "Your transaction has been successfully submitted. Once your transaction will be confirmed, processing of the payment will be initiated. Please don't leave this page untill your transaction is confirmed. Your trasnaction hash is <div style='display:none;' id='pending_txHash' >" + result + "</div> " + `<a href="${apothemExplorer + result}" target="_blank">${result.toString().slice(0, 11)}...</a> <button onclick="copyTextToClipboard('pending_txHash')" >Click</button> to copy hash`;
+                const modBody = "Your transaction has been successfully submitted. Once your transaction will be confirmed, processing of the payment will be initiated. Please don't leave this page untill your transaction is confirmed. Your trasnaction hash is <div style='display:none;' id='pending_txHash' >" + result + "</div> " + `<a href="${ apothemExplorer + result }" target="_blank">${ result.toString().slice(0, 11) }...</a> <button onclick="copyTextToClipboard('pending_txHash')" >Click</button> to copy hash`;
 
                 openModal("modal-info", modTitle, modBody);
 
@@ -1368,14 +1379,14 @@
                     if (!response.status) {
                       // Error, its ok.
                       const modTitle = "<strong>Some Error Occured</strong>";
-                      const modBody = response.error + ".Your trasnaction hash is <div style='display:none' id='confirmed_err_txHash' >" + result + "</div> " + `<a href="${apothemExplorer + result}" target="_blank">${result.toString().slice(0, 11)}...</a> <button onclick="copyTextToClipboard('confirmed_err_txHash')" >Click</button> to copy hash`;
+                      const modBody = response.error + ".Your trasnaction hash is <div style='display:none' id='confirmed_err_txHash' >" + result + "</div> " + `<a href="${ apothemExplorer + result }" target="_blank">${ result.toString().slice(0, 11) }...</a> <button onclick="copyTextToClipboard('confirmed_err_txHash')" >Click</button> to copy hash`;
                       openModal("modal-warning", modTitle, modBody);
                       $.notifyClose('bottom-right')
                       return
                     } else {
 
                       const modTitle = "<strong>Transaction Received Successfully</strong>";
-                      const modBody = "Your transaction has been successfully submitted & received. Once your transaction has enough confirmations, your payment will be completed. You can check the state of your payment in the <strong><a href='/profile?inFocus=cryptoPayment'>Profile</a></strong> page. Your trasnaction hash is <div style='visibility:hidden' id='confirmed_txHash' >" + result + "</div> " + `<a href="${apothemExplorer + result}" target="_blank">${result.toString().slice(0, 11)}...</a>. Click on link to view on XinFin Explorer.`;
+                      const modBody = "Your transaction has been successfully submitted & received. Once your transaction has enough confirmations, your payment will be completed. You can check the state of your payment in the <strong><a href='/profile?inFocus=cryptoPayment'>Profile</a></strong> page. Your trasnaction hash is <div style='visibility:hidden' id='confirmed_txHash' >" + result + "</div> " + `<a href="${ apothemExplorer + result }" target="_blank">${ result.toString().slice(0, 11) }...</a>. Click on link to view on XinFin Explorer.`;
                       openModal("modal-success", modTitle, modBody);
                       $.notifyClose('bottom-right')
                       return;
@@ -1564,15 +1575,15 @@
 
   function checkReferralCode(course) {
     const courseId = course.id;
-    const referralCode = document.getElementById(`${courseId}ReferralCode`).value;
-    console.log(`Referral Code: ${referralCode}`);
+    const referralCode = document.getElementById(`${ courseId }ReferralCode`).value;
+    console.log(`Referral Code: ${ referralCode }`);
     $.ajax({
       method: "post",
       url: "/api/checkReferralCode",
       data: { referralCode: referralCode },
       success: res => {
         if (!res.status) {
-          $.notify(`<strong>Error</strong>: ${res.error}`, { type: 'danger' });
+          $.notify(`<strong>Error</strong>: ${ res.error }`, { type: 'danger' });
           return;
         }
         $.notify(`Referral code is <strong>valid</strong> !`)

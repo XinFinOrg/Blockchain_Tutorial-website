@@ -1,6 +1,7 @@
 const path = require("path");
 var User = require("../models/user");
 const questions = require("../models/question");
+const ExamSession = require("../models/examSession");
 const utils = require("../utils.js");
 const renderCertificate = require("../helpers/renderCertificate");
 const socialPostListener = require("../listeners/postSocial").em;
@@ -41,7 +42,7 @@ exports.submitExam = async (req, res, next) => {
   var marks = 0;
   const backUrl = req.header("Referer");
   const examName = backUrl.split("/")[3].split("-")[1];
-  console.log(`User ${req.user.email} submitted the exam ${examName}.`);
+  console.log(`User ${ req.user.email } submitted the exam ${ examName }.`);
   const request = JSON.parse(JSON.stringify(req.body, null, 2));
   let attempts = req.user.examData.examBasic.attempts;
   let attemptsAdvanced = req.user.examData.examAdvanced.attempts;
@@ -585,7 +586,7 @@ exports.getBlockchainWalletExam = (req, res) => {
 
 exports.getExamResult = async (req, res) => {
   console.log(
-    `called the exam-result endpoint by ${req.user.email} at ${Date.now()}`
+    `called the exam-result endpoint by ${ req.user.email } at ${ Date.now() }`
   );
   const backUrl = req.header("Referer");
   console.log("BackURL: ", backUrl);
@@ -659,12 +660,12 @@ exports.getExamResult = async (req, res) => {
     // Yeah!
     examStatus = true;
     let d = new Date();
-    console.log(`Last Attemp timestamp : ${findLastAttempt(user, examName)}`);
+    console.log(`Last Attemp timestamp : ${ findLastAttempt(user, examName) }`);
     if (user.examData.payment[examTypes[examName].coursePayment_id] != true) {
       return res.redirect("/exams");
     }
     let donerName =
-      user.examData.payment[`${examTypes[examName].coursePayment_id}_doner`];
+      user.examData.payment[`${ examTypes[examName].coursePayment_id }_doner`];
     // Post the 2 certificates
     renderCertificate.renderForIPFSHash(
       name,
@@ -672,7 +673,6 @@ exports.getExamResult = async (req, res) => {
       examName,
       d,
       donerName,
-      null,
       (bothRender) => {
         if (!bothRender.uploaded) {
           console.log("error:", bothRender);
@@ -714,6 +714,19 @@ exports.getExamResult = async (req, res) => {
           user.save();
           res.render("examResult", jsonData);
           socialPostListener.emit("varTriggerUpdate", "certificates");
+
+
+          /**
+           * 
+           * UPDATE MODAL FORR EXAM SESSION
+           * 
+           * marks:,
+           * headlessHash:
+           * clientHash:
+           * status:pass
+           * 
+           */
+          ExamSession.findOneAndUpdate({ email: req.user.email }, { $set: { marks: percentObtained, headlessHash: obj.headlessHash, clientHash: obj.clientHash, status: "pass" } }).sort({ createdAt: -1 });
           return;
         }
       }
@@ -722,6 +735,18 @@ exports.getExamResult = async (req, res) => {
     // No!
     jsonData.examStatus = false;
     res.render("examResult", jsonData);
+
+    /**
+     * 
+     * UPDATE MODAL FORR EXAM SESSION
+     * 
+     * marks:,
+     * headlessHash:""
+     * clientHash:""
+     * status:fail
+     * 
+     */
+    ExamSession.findOneAndUpdate({ email: req.user.email }, { $set: { marks: percentObtained, headlessHash: "", clientHash: "", status: "fail" } }).sort({ createdAt: -1 });
     return;
   }
 };
