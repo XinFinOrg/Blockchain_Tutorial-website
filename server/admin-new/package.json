@@ -86,7 +86,7 @@
     "url-loader": "0.5.9",
     "web3": "1.2.0",
     "webpack": "3.5.1",
-    "webpack-dev-server": "3.0.0",
+    "webpack-dev-server": "3.1.11",
     "webpack-manifest-plugin": "1.2.1",
     "whatwg-fetch": "2.0.3",
     "xlsx": "^0.16.0"
