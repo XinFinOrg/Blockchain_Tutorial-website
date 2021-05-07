@@ -25,7 +25,7 @@
     "gulp-metalsmith": "^1.1.0",
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.0.2",
-    "handlebars": "^4.7.6",
+    "handlebars": "^4.7.7",
     "handlebars-layout": "^0.1.4",
     "jsdom": "^13.2.0",
     "keythereum": "^1.0.4",
